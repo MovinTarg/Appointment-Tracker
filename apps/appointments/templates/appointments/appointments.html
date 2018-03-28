@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Your Appointments</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class='container'>
+            <a href="/logoff">Logout</a>
+            <h1>Hello, {{ active_name }}!</h1>
+            <p>Here are your appointments for today, {{ today }}</p>
+            <table class="table table-bordered">
+                <thead>
+                    <th>Task</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </thead>
+                <tbody>
+                    {% for appointment in today_appointments %}
+                    <tr>
+                        <td>{{ appointment.task }}</td>
+                        <td>{{ appointment.time }}</td>
+                        {% if appointment.status == 1 %}
+                        <td>Pending</td>
+                        {% endif %}
+                        {% if appointment.status == 2 %}
+                        <td>Done</td>
+                        {% endif %}
+                        {% if appointment.status == 3 %}
+                        <td>Missed</td>
+                        {% endif %}
+                        <td>
+                        <a href="/appointments/{{ appointment.id }}/edit">Edit</a> | <a href="/appointments/{{ appointment.id }}/delete">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h1>Your Other Appointments</h1>
+            <table class="table table-bordered">
+                <thead>
+                    <th>Task</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                </thead>
+                <tbody>
+                    {% for appointment in future_appointments %}
+                    {% if appointment.date > today %}
+                    <tr>
+                        <td>{{ appointment.task }}</td>
+                        <td>{{ appointment.date }}</td>
+                        <td>{{ appointment.time }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h1>Add Appointment</h1>
+            {% if messages %}
+            <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+            <form action="/add" method="POST">
+                {% csrf_token %}
+                <label for="date">Date:
+                    <input type="date" name="date">
+                </label>
+                <label for="time">Time:
+                    <input type="time" name="time">
+                </label>
+                <label for="task">Task:
+                    <input type="text" name="task">
+                </label>
+                <br>
+                <input type="submit" value="Add">
+            </form>
+        </div>
+    </body>
+</html>

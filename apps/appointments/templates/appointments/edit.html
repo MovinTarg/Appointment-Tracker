@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Update Appointment</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class='container'>
+            <a href="/appointments">Dashboard</a>
+            <a href="/logoff">Logout</a>
+            {% if messages %}
+            <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+            <h2>Edit Information</h2>
+            <form action="/appointments/{{ appointment.id }}/update" method="POST">
+                {% csrf_token %}
+                <label for="task">Task:
+                    <input type="text" name="task" value="{{ appointment.task }}" placeholder="{{ appointment.task }}">
+                </label>
+                <label for="status">Status:
+                    <select name="status" value="{{ appointment.status }}" placeholder="{{ appointment.status }}">
+                        <option value="1">Pending</option>
+                        <option value="2">Done</option>
+                        <option value="3">Missed</option>
+                    </select>
+                </label>
+                <label for="date">Date:
+                    <input type="date" name="date" value="{{ appointment.date }}" placeholder="{{ appointment.date }}">
+                </label>
+                <label for="time">Time:
+                    <input type="time" name="time" value="{{ appointment.time }}" placeholder="{{ appointment.time }}">
+                </label>
+                <input type="submit" value="Update">
+            </form>
+        </div>
+    </body>
+</html>
