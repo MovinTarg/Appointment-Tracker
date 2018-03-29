@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
-import datetime
+from datetime import datetime
 from .models import *
 
 # Create your views here.
@@ -13,7 +13,7 @@ def index(req):
     return render(req, 'appointments/index.html')
 
 def create(req):
-    errors = User.objects.basic_validator(req.POST)
+    errors = User.objects.basic_validator(req.POST, req.session['active_id'])
     if len(errors):
         for tag, error in errors.iteritems():
             messages.error(req, error, extra_tags=tag)
@@ -39,23 +39,19 @@ def logoff(req):
     return redirect('/main')
 
 def appointments(req):
-    current = datetime.datetime.now().date()
-    now = datetime.datetime.strftime(current, '%Y-%m-%d')
-    time_current = datetime.datetime.now()
-    time_now = datetime.datetime.strftime(time_current, '%H:%M:%S')
-    print time_now
-
+    if req.session == False:
+        return redirect('/main')
+    current = datetime.now().date()
     context = {
         'today': current,
-        'time_now': time_now,
         'active_name': req.session['active_name'],
         'future_appointments': Appointment.objects.filter(appointee = User.objects.get(id=req.session['active_id'])).order_by('date', 'time'),
-        'today_appointments': Appointment.objects.filter(appointee = User.objects.get(id=req.session['active_id'])).filter(date = now).order_by('time')
+        'today_appointments': Appointment.objects.filter(appointee = User.objects.get(id=req.session['active_id'])).filter(date = current).order_by('time')
     }
     return render(req, 'appointments/appointments.html', context)
 
 def add(req):
-    errors = Appointment.objects.basic_validator(req.POST)
+    errors = Appointment.objects.basic_validator(req.POST, req.session['active_id'])
     if len(errors):
         for tag, error in errors.iteritems():
             messages.error(req, error, extra_tags=tag)
@@ -68,6 +64,8 @@ def delete(req, appointment_id):
     return redirect('/appointments')
 
 def edit(req, appointment_id):
+    if req.session == False:
+        return redirect('/main')
     context = {
         'appointment': Appointment.objects.get(id=appointment_id),
     }

@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from django.db import models
 import re
 import bcrypt
-import datetime
+from datetime import datetime
+from datetime import time
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 
@@ -54,36 +55,46 @@ class User(models.Model):
     objects = UserManager()
 
 class AppointmentManager(models.Manager):
-    def basic_validator(self, postData):
+    def basic_validator(self, postData, user_id):
         errors = {}
-        current = datetime.datetime.now().date()
-        now = datetime.datetime.strftime(current, '%Y-%m-%d')
-        time_current = datetime.datetime.now()
-        time_now = datetime.datetime.strftime(time_current, '%H:%M:%S')
-        appointment_time = str(postData['time'])+':00'
-        apt_time = datetime.datetime.strftime(appointment_time, '%H:%M:%S')
-        print apt_time
-        
-        appointments = Appointment.objects.all()
+        now = datetime.now()
+        form_dt = datetime.strptime("{}, {}".format(postData['date'], postData['time']), "%Y-%m-%d, %H:%M")
+        appointments = Appointment.objects.filter(appointee = user_id)
         for appointment in appointments:
-            print '-----'
-            print appointment.date
-            print appointment.time
-            if appointment.date == postData['date'] and appointment.time == apt_time:
+            appointment_dt = datetime.strptime("{}, {}".format(appointment.date, appointment.time), "%Y-%m-%d, %H:%M:%S")
+            # print appointment_dt
+            # print form_dt
+            # print '-'*50
+            if appointment_dt == form_dt:
                 errors['duplicate_time'] = "Appointment already scheduled for that time!"
         if len(postData['task']) < 1:
             errors["empty_task"] = "Task cannot be empty!"
-        if now > postData['date']:
-            errors["past_date"] = "Must select a current or future date!"
-        if time_now > postData['time']:
-            errors["past_time"] = "Must select a future time!"
+        if now > form_dt:
+            errors["past_date"] = "Must select a current or future date and time!"
         return errors
 class Appointment(models.Model):
     task = models.CharField(max_length=255)
     status = models.IntegerField(default = 1)
     date = models.DateField()
-    time = models.TimeField('%H:%M')
+    time = models.TimeField()
     appointee = models.ForeignKey(User, related_name='appointments')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     objects = AppointmentManager()
+
+    def html_date(self):
+        date_obj = self.date.__str__()
+        return date_obj
+    
+    def html_time(self):
+        time_obj = self.time.__str__()
+        return time_obj
+    
+    def html_time_up(self):
+        now = datetime.now()
+        appointment_dt = datetime.strptime("{}, {}".format(self.date, self.time), "%Y-%m-%d, %H:%M:%S")
+        # print appointment_dt
+        if now > appointment_dt:
+            return True
+        else:
+            return False

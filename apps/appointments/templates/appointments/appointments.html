@@ -35,7 +35,9 @@
                         <td>Missed</td>
                         {% endif %}
                         <td>
+                        {% if appointment.html_time_up == False %}
                         <a href="/appointments/{{ appointment.id }}/edit">Edit</a> | <a href="/appointments/{{ appointment.id }}/delete">Delete</a>
+                        {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
