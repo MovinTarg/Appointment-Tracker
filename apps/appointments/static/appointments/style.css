@@ -1,0 +1,17 @@
+.container {
+    background: lightgreen;
+    padding-bottom: 20px;
+}
+.container h1 {
+    text-align: center;
+}
+
+.left {
+    width: 49%;
+    display: inline-block;
+}
+.right {
+    width: 49%;
+    display: inline-block;
+    vertical-align: top;
+}
