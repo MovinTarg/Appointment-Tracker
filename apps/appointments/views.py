@@ -13,7 +13,7 @@ def index(req):
     return render(req, 'appointments/index.html')
 
 def create(req):
-    errors = User.objects.basic_validator(req.POST, req.session['active_id'])
+    errors = User.objects.basic_validator(req.POST)
     if len(errors):
         for tag, error in errors.iteritems():
             messages.error(req, error, extra_tags=tag)
@@ -72,7 +72,7 @@ def edit(req, appointment_id):
     return render(req, 'appointments/edit.html', context)
 
 def update(req, appointment_id):
-    errors = Appointment.objects.basic_validator(req.POST)
+    errors = Appointment.objects.basic_validator(req.POST, req.session['active_id'])
     if len(errors):
         for tag, error in errors.iteritems():
             messages.error(req, error, extra_tags=tag)

@@ -13,8 +13,11 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 class UserManager(models.Manager):
     def basic_validator(self, postData):
         errors = {}
-        current = datetime.datetime.now().date()
-        now = datetime.datetime.strftime(current, '%Y-%m-%d')
+        if len(postData['birth']) < 1:
+            errors["empty_date"] = "Date cannot be empty!"
+            return errors
+        now = datetime.now()
+        form_dt = datetime.strptime("{}".format(postData['birth']), "%Y-%m-%d")
         users = User.objects.all()
         for user in users:
             if user.email == postData['email']:
@@ -31,8 +34,8 @@ class UserManager(models.Manager):
             errors["short_password"] = "Password must contain at least eight characters!"
         if postData['confirm_password'] != postData['password']:
             errors["password_does_not_match"] = "Passwords must match!"
-        if now <= postData['birth']:
-            errors["future_birth"] = "Must select a date of birth before today!"
+        if now < form_dt:
+            errors["future_birth"] = "Cannot select a future birthday!"
         return errors
     def login_validator(self, postData):
         errors = {}
@@ -57,6 +60,12 @@ class User(models.Model):
 class AppointmentManager(models.Manager):
     def basic_validator(self, postData, user_id):
         errors = {}
+        if len(postData['date']) < 1:
+            errors["empty_date"] = "Date cannot be empty!"
+            return errors
+        if len(postData['time']) < 1:
+            errors["empty_time"] = "Time cannot be empty!"
+            return errors
         now = datetime.now()
         form_dt = datetime.strptime("{}, {}".format(postData['date'], postData['time']), "%Y-%m-%d, %H:%M")
         appointments = Appointment.objects.filter(appointee = user_id)
